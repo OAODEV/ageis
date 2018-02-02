@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: agias
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: agias
+    spec:
+      containers:
+      - name: agias
+        image: us.gcr.io/lexical-cider-93918/agias:latest
+        volumeMounts:
+        - mountPath: /etc/ssl/certs
+          name: ca-certificates
+        securityContext:
+          capabilities:
+            add:
+            - SYS_ADMIN
+          privileged: true
+        lifecycle:
+          postStart:
+            exec:
+              command: ["gcsfuse", "report-definitions", "/app/agias/gcsfuse"]
+          preStop:
+            exec:
+              command: ["fusermount", "-u", "/app/agias/gcsfuse"]
+      volumes:
+      - name: ca-certificates
+        hostPath:
+          path: /etc/ssl/certs
