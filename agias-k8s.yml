@@ -10,6 +10,16 @@ spec:
         app: agias
     spec:
       containers:
+      - name: esp
+        image: gcr.io/endpoints-release/endpoints-runtime:1
+        args: [
+          "--http_port=8080",
+          "--backend=127.0.0.1:5000",
+          "--service=agias.endpoints.lexical-cider-93918.cloud.goog",
+          "--version=2018-02-07r0",
+        ]
+        ports:
+          - containerPort: 8080
       - name: agias
         image: us.gcr.io/lexical-cider-93918/agias:latest
         volumeMounts:
@@ -23,10 +33,10 @@ spec:
         lifecycle:
           postStart:
             exec:
-              command: ["gcsfuse", "report-definitions", "/app/agias/gcsfuse"]
+              command: ["gcsfuse", "report-definitions", "/app/reports"]
           preStop:
             exec:
-              command: ["fusermount", "-u", "/app/agias/gcsfuse"]
+              command: ["fusermount", "-u", "/app/reports"]
       volumes:
       - name: ca-certificates
         hostPath:
