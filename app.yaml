@@ -9,6 +9,7 @@ runtime_config:
 env_variables:
   FLASK_APP: /app/main.py
   OPSIS_DOMAIN: opsis-dot-lexical-cider-93918.appspot.com
+  NERIUM_DOMAIN: nerium-dot-lexical-cider-93918.appspot.com
 
 readiness_check:
   path: "/health"

@@ -13,6 +13,7 @@ import logging
 app = Flask(__name__)
 
 OPSIS_DOMAIN = os.environ.get("OPSIS_DOMAIN")
+NERIUM_DOMAIN = os.environ.get("NERIUM_DOMAIN")
 
 
 def load_reports():
@@ -62,8 +63,7 @@ def report(display, report_name):
     for chart_type in chart_types:
         # TODO refactor to coordinate result set format
         q = str(request.query_string, "utf-8") # :/
-        url = "http://nerium/v1/{}/?{}".format(query_name, q)
-        logging.info("requesting {}".format(url))
+        url = "https://{}/v1/{}/?{}".format(NERIUM_DOMAIN, query_name, q)
         response = requests.get(
             "https://{}/v1/{}/".format(OPSIS_DOMAIN, chart_type),
             params={"formatted_results_location": url},
