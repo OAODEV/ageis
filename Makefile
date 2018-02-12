@@ -1,4 +1,5 @@
 deploy:
-	docker build -t localtest .
-	docker run -it localtest pytest
+	docker build -f Testenv -t testenv .
+	docker run -it testenv pytest test_agias.py
 	gcloud app deploy
+
