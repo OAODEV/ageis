@@ -12,6 +12,8 @@ import logging
 
 app = Flask(__name__)
 
+OPSIS_DOMAIN = os.environ.get("OPSIS_DOMAIN")
+
 
 def load_reports():
     reports_path = os.environ.get("REPORT_DEF_PATH", "./reports")
@@ -63,7 +65,7 @@ def report(display, report_name):
         url = "http://nerium/v1/{}/?{}".format(query_name, q)
         logging.info("requesting {}".format(url))
         response = requests.get(
-            "http://opsis/v1/{}/".format(chart_type),
+            "https://{}/v1/{}/".format(OPSIS_DOMAIN, chart_type),
             params={"formatted_results_location": url},
         )
         charts.append(response.text)

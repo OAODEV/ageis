@@ -8,11 +8,12 @@ runtime_config:
 
 env_variables:
   FLASK_APP: /app/main.py
+  OPSIS_DOMAIN: opsis-dot-lexical-cider-93918.appspot.com
 
 readiness_check:
   path: "/health"
   check_interval_sec: 60
-  timeout_sec: 40
+  timeout_sec: 4
   failure_threshold: 2
   success_threshold: 1
 
