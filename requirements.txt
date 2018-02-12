@@ -2,3 +2,5 @@ pytest
 flask
 requests
 PyYAML
+pytest-flask
+

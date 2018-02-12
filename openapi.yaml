@@ -1,0 +1,44 @@
+swagger: "2.0"
+info:
+  title: Agias
+  version: "0.0.2"
+host: agias-dot-lexical-cider-93918.appspot.com
+paths:
+  /health:
+    get:
+      description: health check
+      operationId: healthCheck
+      responses:
+        200:
+          description: OK
+  /v1/{display}/{report}:
+    get:
+      description: report for a display
+      operationId: getReportForDisplay
+      parameters:
+        - name: display
+          in: path
+          type: string
+          required: true
+          description: Where the report will be shown (web, slack, mobile, etc.)
+        - name: report
+          in: path
+          required: true
+          type: string
+          description: The name of the report
+      responses:
+        200:
+          description: Returns an array of charts, first being the default
+        404:
+          description: Not found
+
+#security:
+#  - google_id_token: []
+
+#securityDefinitions:
+#  google_id_token:
+#    authorizationUrl: ""
+#    flow: "implicit"
+#    type: "oauth2"
+#    x-google-issuer: "https://accounts.google.com"
+#    x-google-jwks_uri: "https://www.googleapis.com/oauth2/v3/certs"

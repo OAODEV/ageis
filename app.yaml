@@ -1,0 +1,35 @@
+runtime: python
+env: flex
+service: agias
+entrypoint: flask run --host=0.0.0.0 --port=$PORT
+
+runtime_config:
+  python_version: 3
+
+env_variables:
+  FLASK_APP: /app/main.py
+
+readiness_check:
+  path: "/health"
+  check_interval_sec: 60
+  timeout_sec: 40
+  failure_threshold: 2
+  success_threshold: 1
+
+liveness_check:
+  path: "/health"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 1
+
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 15
+  cool_down_period_sec: 180
+  cpu_utilization:
+    target_utilization: 0.6
+
+endpoints_api_service:
+  name: agias-dot-lexical-cider-93918.appspot.com
+  config_id: 2018-02-08r1

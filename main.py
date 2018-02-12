@@ -7,6 +7,7 @@ from flask import (
 import requests
 import yaml
 import os
+import logging
 
 
 app = Flask(__name__)
@@ -34,7 +35,7 @@ def load_reports():
 class ReportException(Exception):
     status_code = 400
 
-    def __init__(self, message):
+    def __init__(self, message="Not Found"):
         Exception.__init__(self)
         self.message = message
 
@@ -43,7 +44,7 @@ class ReportException(Exception):
         return d
 
 
-@app.route("/v1/<display>/<report_name>/")
+@app.route("/v1/<display>/<report_name>")
 def report(display, report_name):
     # TODO don't load reports on every request
     reports = load_reports()
@@ -59,23 +60,19 @@ def report(display, report_name):
     for chart_type in chart_types:
         # TODO refactor to coordinate result set format
         q = str(request.query_string, "utf-8") # :/
-        url = "http://results/v1/{}/?{}".format(query_name, q)
+        url = "http://nerium/v1/{}/?{}".format(query_name, q)
+        logging.info("requesting {}".format(url))
         response = requests.get(
-            "http://charts/v1/{}/".format(chart_type),
+            "http://opsis/v1/{}/".format(chart_type),
             params={"formatted_results_location": url},
         )
         charts.append(response.text)
 
     return jsonify(charts=charts)
 
-
-@app.route("/healthz")
-def healthz():
-    return jsonify({"health": "OK already get off my back"})
-
-@app.route("/")
+@app.route("/health")
 def health():
-    return jsonify({"health": "OK already get off my back"})
+    return jsonify({"health": "OK"})
 
 
 @app.errorhandler(ReportException)
