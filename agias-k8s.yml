@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: agias
-        image: us.gcr.io/lexical-cider-93918/agias:latest
+        image: scratch
         volumeMounts:
         - mountPath: /etc/ssl/certs
           name: ca-certificates
