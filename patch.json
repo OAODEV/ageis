@@ -1,0 +1,55 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "name": "{{service_name}}",
+            "volumeMounts": [
+              {
+                "mountPath": "/etc/ssl/certs",
+                "name": "ca-certificates"
+              }
+            ],
+            "securityContext": {
+              "capabilities": {
+                "add": [
+                  "SYS_ADMIN"
+                ]
+              },
+              "privileged": true
+            },
+            "lifecycle": {
+              "postStart": {
+                "exec": {
+                  "command": [
+                    "gcsfuse",
+                    "report-definitions",
+                    "/app/agias/gcsfuse"
+                  ]
+                }
+              },
+              "preStop": {
+                "exec": {
+                  "command": [
+                    "fusermount",
+                    "-u",
+                    "/app/agias/gcsfuse"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "name": "ca-certificates",
+            "hostPath": {
+              "path": "/etc/ssl/certs"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
