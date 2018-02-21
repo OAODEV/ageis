@@ -12,7 +12,7 @@ run pip3 install -r requirements.txt
 
 run mkdir /app
 workdir /app
-volume /app/agias/gcsfuse
+volume /app/reports
 copy *.py /app/
 copy --from=gcsfuse-build  /go/bin/gcsfuse /usr/local/bin/
 

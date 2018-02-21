@@ -14,10 +14,10 @@ spec:
         lifecycle:
           postStart:
             exec:
-              command: ["gcsfuse", "report-definitions", "/app/agias/gcsfuse"]
+              command: ["gcsfuse", "report-definitions", "/app/reports"]
           preStop:
             exec:
-              command: ["fusermount", "-u", "/app/agias/gcsfuse"]
+              command: ["fusermount", "-u", "/app/reports"]
       volumes:
       - name: ca-certificates
         hostPath:
