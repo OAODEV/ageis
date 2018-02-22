@@ -43,7 +43,7 @@ class ReportException(Exception):
         return d
 
 
-@app.route("/v1/<display>/<report_name>/")
+@app.route("/v1/<display>/<report_name>", strict_slashes=False)
 def report(display, report_name):
     # TODO don't load reports on every request
     reports = load_reports()
@@ -59,10 +59,14 @@ def report(display, report_name):
     for chart_type in chart_types:
         # TODO refactor to coordinate result set format
         q = str(request.query_string, "utf-8") # :/
-        url = "http://results/v1/{}/?{}".format(query_name, q)
+        url = "http://nerium/v1/{}/?{}".format(query_name, q)
         response = requests.get(
-            "http://charts/v1/{}/".format(chart_type),
-            params={"formatted_results_location": url},
+            "http://opsis/v1/{}/".format(chart_type),
+            params={
+                "formatted_results_location": url,
+                "report_name": report_name,
+                "display": display,
+            }
         )
         charts.append(response.text)
 
@@ -71,11 +75,12 @@ def report(display, report_name):
 
 @app.route("/healthz")
 def healthz():
-    return jsonify({"health": "OK already get off my back"})
+    return jsonify({"health": "OK"})
+
 
 @app.route("/")
 def health():
-    return jsonify({"health": "OK already get off my back"})
+    return jsonify({"health": "OK"})
 
 
 @app.errorhandler(ReportException)

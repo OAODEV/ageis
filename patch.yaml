@@ -1,17 +1,8 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: agias
 spec:
-  replicas: 1
   template:
-    metadata:
-      labels:
-        app: agias
     spec:
       containers:
-      - name: agias
-        image: us.gcr.io/lexical-cider-93918/agias:latest
+      - name: {{service_name}}
         volumeMounts:
         - mountPath: /etc/ssl/certs
           name: ca-certificates
@@ -23,10 +14,10 @@ spec:
         lifecycle:
           postStart:
             exec:
-              command: ["gcsfuse", "report-definitions", "/app/agias/gcsfuse"]
+              command: ["gcsfuse", "report-definitions", "/app/reports"]
           preStop:
             exec:
-              command: ["fusermount", "-u", "/app/agias/gcsfuse"]
+              command: ["fusermount", "-u", "/app/reports"]
       volumes:
       - name: ca-certificates
         hostPath:
