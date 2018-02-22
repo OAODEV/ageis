@@ -12,11 +12,9 @@ run pip3 install -r requirements.txt
 
 run mkdir /app
 workdir /app
-volume /app/agias/gcsfuse
+volume /app/reports
 copy *.py /app/
 copy --from=gcsfuse-build  /go/bin/gcsfuse /usr/local/bin/
-
-run pytest .
 
 env FLASK_APP /app/main.py
 cmd flask run --host=0.0.0.0
