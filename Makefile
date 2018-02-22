@@ -12,7 +12,7 @@ build:
 	docker build -t $(IMAGE_NAME) .
 
 
-.PHONY: local-test
+.PHONY: test
 test: build
 	docker run -it $(IMAGE_NAME) $(TEST_COMMAND)
 

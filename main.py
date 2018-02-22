@@ -62,7 +62,11 @@ def report(display, report_name):
         url = "http://nerium/v1/{}/?{}".format(query_name, q)
         response = requests.get(
             "http://opsis/v1/{}/".format(chart_type),
-            params={"formatted_results_location": url},
+            params={
+                "formatted_results_location": url,
+                "report_name": report_name,
+                "display": display,
+            }
         )
         charts.append(response.text)
 
