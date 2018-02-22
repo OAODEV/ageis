@@ -24,7 +24,7 @@ deploy: test cluster
 ifdef PATCH_FILE
 	kubectl patch deployment $(SERVICE_NAME) --patch '$(subst {{service_name}},$(SERVICE_NAME),$(shell cat $(PATCH_FILE)))'
 endif
-	kubectl expose deployment $(SERVICE_NAME) --port=80 --target-port=$(TARGET_PORT)
+	kubectl expose deployment $(SERVICE_NAME) --port=80 --target-port=$(TARGET_PORT) --type=NodePort
 
 
 .PHONY: clean
