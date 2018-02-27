@@ -4,21 +4,9 @@ spec:
       containers:
       - name: {{service_name}}
         volumeMounts:
-        - mountPath: /etc/ssl/certs
-          name: ca-certificates
-        securityContext:
-          capabilities:
-            add:
-            - SYS_ADMIN
-          privileged: true
-        lifecycle:
-          postStart:
-            exec:
-              command: ["gcsfuse", "report-definitions", "/app/reports"]
-          preStop:
-            exec:
-              command: ["fusermount", "-u", "/app/reports"]
+        - mountPath: /app/charts
+          name: charts-volume
       volumes:
-      - name: ca-certificates
-        hostPath:
-          path: /etc/ssl/certs
+      - name: charts-volume
+        configMap:
+          name: charts
