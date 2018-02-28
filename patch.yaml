@@ -2,11 +2,11 @@ spec:
   template:
     spec:
       containers:
-      - name: {{service_name}}
+      - name: agias
         volumeMounts:
-        - mountPath: /app/charts
-          name: charts-volume
+        - mountPath: /app/reports
+          name: reports-volume
       volumes:
-      - name: charts-volume
+      - name: reports-volume
         configMap:
-          name: charts
+          name: reports
