@@ -4,6 +4,17 @@ from flask import (
     jsonify,
 )
 
+from errors import (
+    AgiasException,
+    ChartTypeNotAvailable,
+    ReportNotFound,
+)
+
+from urllib.parse import (
+    urlsplit,
+    urlunsplit,
+)
+
 import requests
 import yaml
 import os
@@ -15,6 +26,7 @@ app = Flask(__name__)
 def load_reports():
     reports_path = os.environ.get("REPORT_DEF_PATH", "./reports")
     report_defs = []
+
     for root, _, files in os.walk(reports_path):
         for f in [f for f in files if f.endswith(".yaml")]:
             filepath = os.path.join(root, f)
@@ -31,46 +43,83 @@ def load_reports():
     return reports
 
 
-class ReportException(Exception):
-    status_code = 400
-
-    def __init__(self, message):
-        Exception.__init__(self)
-        self.message = message
-
-    def to_dict(self):
-        d = {"message": self.message}
-        return d
-
-
 @app.route("/v1/<display>/<report_name>", strict_slashes=False)
 def report(display, report_name):
-    # TODO don't load reports on every request
+    # load reports on every request until it's a bottleneck
     reports = load_reports()
-    query_name, displays = reports.get(report_name, (None, {}))
-    chart_types = displays.get(display, None)
+    query_name, displays = reports.get(report_name, ("", {}))
+    chart_types = displays.get(display, [])
 
     if not all([query_name, displays, chart_types]):
-        raise ReportException(
+        raise ReportNotFound(
             "Report {} for {} Not Found".format(report_name, display),
         )
 
-    charts = []
-    for chart_type in chart_types:
-        # TODO refactor to coordinate result set format
-        q = str(request.query_string, "utf-8") # :/
-        url = "http://nerium/v1/{}/?{}".format(query_name, q)
-        response = requests.get(
-            "http://opsis/v1/{}/".format(chart_type),
-            params={
-                "formatted_results_location": url,
-                "report_name": report_name,
-                "display": display,
-            }
+    # TODO consider how discovery of parameters will work, this one is now
+    # reserved and cannot be used by a query
+    specified_chart_type = request.args.get("ag_chart", "")
+    if specified_chart_type and specified_chart_type not in chart_types:
+        error_tmpl = (
+            "Chart type {} not available for {} report. "
+            "Expecting one of {}"
         )
-        charts.append(response.text)
+        raise ChartTypeNotAvailable(error_message.format(
+            specified_chart_type,
+            report_name,
+            chart_types,
+        ))
+    elif specified_chart_type:
+        chart_types = [specified_chart_type]
 
-    return jsonify(charts=charts)
+    # The zero charts object
+    charts = {
+        "default": {
+            "type": "",
+            "data": ""
+        },
+        "options": [],
+    }
+
+    # We get and render the first (default) chart type
+    chart_type = chart_types[0]
+    q = str(request.query_string, "utf-8") # :/
+    url = "http://nerium/v1/{}/?{}".format(query_name, q)
+    response = requests.get(
+        "http://opsis/v1/{}/".format(chart_type),
+        params={
+            "formatted_results_location": url,
+            "report_name": report_name,
+            "display": display,
+        }
+    )
+    charts["default"]["data"] = response.text
+    charts["default"]["type"] = chart_type
+
+    # HATEOAS for optional chart types
+    for chart_type in chart_types[1:]:
+        split_url = urlsplit(request.url)
+        chart_request_query_param = "ag_chart={}".format(chart_type)
+        chart_request_query = "&".join([
+            split_url.query,
+            chart_request_query_param,
+        ])
+        chart_request_url = urlunsplit((
+            split_url.scheme,
+            split_url.netloc,
+            split_url.path,
+            chart_request_query,
+            split_url.fragment,
+        ))
+        charts['options'].append({
+            "type": chart_type,
+            "uri": chart_request_url,
+        })
+
+    return jsonify(
+        charts=charts,
+        status=200,
+        error="",
+    )
 
 
 @app.route("/healthz")
@@ -83,8 +132,9 @@ def health():
     return jsonify({"health": "OK"})
 
 
-@app.errorhandler(ReportException)
+@app.errorhandler(AgiasException)
 def handle_exception(e):
     response = jsonify(e.to_dict())
     response.status_code = e.status_code
     return response
+
