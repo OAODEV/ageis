@@ -118,7 +118,7 @@ def report(display, report_name):
     return jsonify(
         charts=charts,
         status=200,
-        error="",
+        error=None,
     )
 
 
