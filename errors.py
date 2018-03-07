@@ -12,8 +12,8 @@ class AgiasException(Exception):
             "error": self.message,
             "charts": {
                 "default": {
-                    "type": "",
-                    "data": "",
+                    "type": None,
+                    "data": None,
                 },
                 "options": [],
             },
