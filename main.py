@@ -71,13 +71,11 @@ def report(display, report_name):
     elif specified_chart_type:
         chart_types = [specified_chart_type]
 
-    # The zero charts object
-    charts = {
-        "default": {
-            "type": "",
-            "data": ""
-        },
-        "options": [],
+    # The zero chart object
+    chart = {
+        "type": None,
+        "data": None,
+        "alternates": [],
     }
 
     # We get and render the first (default) chart type
@@ -92,8 +90,8 @@ def report(display, report_name):
             "display": display,
         }
     )
-    charts["default"]["data"] = response.text
-    charts["default"]["type"] = chart_type
+    chart["data"] = response.text
+    chart["type"] = chart_type
 
     # HATEOAS for optional chart types
     for chart_type in chart_types[1:]:
@@ -110,13 +108,13 @@ def report(display, report_name):
             chart_request_query,
             split_url.fragment,
         ))
-        charts['options'].append({
+        chart['alternates'].append({
             "type": chart_type,
             "uri": chart_request_url,
         })
 
     return jsonify(
-        charts=charts,
+        chart=chart,
         status=200,
         error=None,
     )
