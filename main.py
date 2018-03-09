@@ -54,7 +54,7 @@ def report(display, report_name):
     query_name, displays = reports.get(report_name, ("", {}))
     chart_types = displays.get(display, [])
 
-    required_formats = requests.get("http://opsis/v1/").json
+    required_formats = requests.get("http://opsis/v1/").json()
 
     if not all([query_name, displays, chart_types]):
         raise ReportNotFound(
