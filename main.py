@@ -69,7 +69,7 @@ def report(display, report_name):
             "Chart type {} not available for {} report. "
             "Expecting one of {}"
         )
-        raise ChartTypeNotAvailable(error_message.format(
+        raise ChartTypeNotAvailable(error_tmpl.format(
             specified_chart_type,
             report_name,
             chart_types,
@@ -89,7 +89,7 @@ def report(display, report_name):
     q = str(request.query_string, "utf-8") # :/
     required_format = required_formats.get(chart_type, None)
     if required_format:
-        q = "&".join([q, "ne_format={}".format(required_format)])
+        q = "&".join([q, "ne_format={}".format(required_format)]).strip("&")
     url = "http://nerium/v1/{}/?{}".format(query_name, q)
     response = requests.get(
         "http://opsis/v1/{}/".format(chart_type),
@@ -109,7 +109,7 @@ def report(display, report_name):
         chart_request_query = "&".join([
             split_url.query,
             chart_request_query_param,
-        ])
+        ]).strip("&")
         chart_request_url = urlunsplit((
             split_url.scheme,
             split_url.netloc,
