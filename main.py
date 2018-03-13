@@ -43,12 +43,18 @@ def load_reports():
     return reports
 
 
+def get_format_requirements(reports):
+    return requests.get("http://opsis/v1/").json
+
+
 @app.route("/v1/<display>/<report_name>", strict_slashes=False)
 def report(display, report_name):
     # load reports on every request until it's a bottleneck
     reports = load_reports()
     query_name, displays = reports.get(report_name, ("", {}))
     chart_types = displays.get(display, [])
+
+    required_formats = requests.get("http://opsis/v1/").json()
 
     if not all([query_name, displays, chart_types]):
         raise ReportNotFound(
@@ -63,7 +69,7 @@ def report(display, report_name):
             "Chart type {} not available for {} report. "
             "Expecting one of {}"
         )
-        raise ChartTypeNotAvailable(error_message.format(
+        raise ChartTypeNotAvailable(error_tmpl.format(
             specified_chart_type,
             report_name,
             chart_types,
@@ -81,6 +87,9 @@ def report(display, report_name):
     # We get and render the first (default) chart type
     chart_type = chart_types[0]
     q = str(request.query_string, "utf-8") # :/
+    required_format = required_formats.get(chart_type, None)
+    if required_format:
+        q = "&".join([q, "ne_format={}".format(required_format)]).strip("&")
     url = "http://nerium/v1/{}/?{}".format(query_name, q)
     response = requests.get(
         "http://opsis/v1/{}/".format(chart_type),
@@ -100,7 +109,7 @@ def report(display, report_name):
         chart_request_query = "&".join([
             split_url.query,
             chart_request_query_param,
-        ])
+        ]).strip("&")
         chart_request_url = urlunsplit((
             split_url.scheme,
             split_url.netloc,
